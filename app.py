@@ -5,6 +5,7 @@ import os
 from io import StringIO
 from contextlib import redirect_stdout
 from dotenv import load_dotenv
+from discord.ext import tasks
 
 # For now we run Quincy's scripts exactly as-is to randomly generate the item tables. 
 SCRIPT_URLS = {
@@ -15,7 +16,34 @@ SCRIPT_URLS = {
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = discord.Client(intents=intents)
+class MyClient(discord.Client):
+
+    async def setup_hook(self) -> None:
+        self.task1.start()
+        self.task2.start()
+
+    @tasks.loop(seconds=5)
+    async def task1(self):
+        guild = discord.utils.get(self.guilds, name='Drury Lane')
+        channel1 = discord.utils.get(guild.channels, name='bot-testing')
+        await channel1.send('Task 1!')
+
+    @task1.before_loop
+    async def before_task1(self):
+        await self.wait_until_ready()  # wait until the bot logs in
+
+    @tasks.loop(seconds=3)
+    async def task2(self):
+        guild = discord.utils.get(self.guilds, name='Drury Lane')
+        channel2 = discord.utils.get(guild.channels, name='bot-testing-2')
+        await channel2.send('Task 2!')
+
+    @task2.before_loop
+    async def before_task2(self):
+        await self.wait_until_ready()  # wait until the bot logs in
+
+
+client = MyClient(intents=intents)
 
 @client.event
 async def on_ready():
