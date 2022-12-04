@@ -54,6 +54,15 @@ async def on_message(message):
         print(output)
         await message.channel.send(output)
 
+    if message.content.startswith('$refresh blargh'):
+        output = run_script(SCRIPT_URLS['Tattoo Parlor'])
+        
+        print(output)
+
+        channel = discord.utils.get(message.guild.channels, name='bot-testing-2')
+
+        await channel.send(output)
+
 def run_script(script_url):
     f = urllib.request.urlopen(script_url)
     script = f.read()
