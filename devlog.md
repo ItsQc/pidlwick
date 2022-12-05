@@ -12,6 +12,7 @@ Get the [python-dotenv](https://pypi.org/project/python-dotenv/) library: `pip i
 
 Get the [discord.py](https://discordpy.readthedocs.io/en/latest/index.html) library: `pip install -U discord.py`
 
+Get PyYAML `pip install pyyaml`
 
 ## Create Discord Application
 

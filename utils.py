@@ -1,0 +1,25 @@
+# utils.py
+#
+# Misc utilities for the Pidlwick bot.
+
+import urllib.request
+
+from io import StringIO
+from contextlib import redirect_stdout
+
+# TODO: Make this async
+def run_script(script_url):
+    """
+    Retrieves content from `script_url` and runs it as a Python script using `exec`, returning
+    the stdout output. Brittle? Yes. Unsafe? Oh yeah. Temporary hack only, to be removed once
+    the content generation logic is brought into Pidlwick.
+    """
+    f = urllib.request.urlopen(script_url)
+    script_content = f.read()
+
+    s = StringIO()
+    with redirect_stdout(s):
+        exec(script_content, globals())
+    script_stdout = s.getvalue()
+
+    return script_stdout
