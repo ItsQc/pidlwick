@@ -7,12 +7,9 @@ Writing down what I did so that maybe I or others can replicate it.
 (These commands are for Mac.)
 
 Ensure Python3 and pip are installed
-
-Get the [python-dotenv](https://pypi.org/project/python-dotenv/) library: `pip install python-dotenv`
-
-Get the [discord.py](https://discordpy.readthedocs.io/en/latest/index.html) library: `pip install -U discord.py`
-
-Get PyYAML `pip install pyyaml`
+```python
+pip install -r requirements.txt
+```
 
 ## Create Discord Application
 
@@ -36,3 +33,8 @@ IMPORTANT: Keep the token secret (password manager) and never check it into git.
 ## Installing the Bot
 
 
+## Running the Bot
+
+Build `docker build -t pidlwick-bot .`
+
+Run `docker run pidlwick-bot`
