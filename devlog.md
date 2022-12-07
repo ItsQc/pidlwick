@@ -38,3 +38,9 @@ IMPORTANT: Keep the token secret (password manager) and never check it into git.
 Build `docker build -t pidlwick-bot .`
 
 Run `docker run pidlwick-bot`
+
+## Deploying to Heroku
+
+Outdated? https://remarkablemark.org/blog/2021/03/12/github-actions-deploy-to-heroku/
+
+Heroku Dashboard -> Pidlwick app -> Deploy -> Deployment method: GitHub -> connect app to GitHub
