@@ -29,6 +29,8 @@ Create a Heroku account if you don't already have one and fill out your personal
 
 Create a new app and give it a name (preferably the same as the Discord bot & git repo for simplicity). On the **Deploy** tab, select "GitHub" for **Deployment Method** and then select the repo you're using for the bot code. This will prompt you to authenticate to GitHub in order to allow the Heroku itegration - do so.
 
+You also need to set up environment variables, which Heroku calls "Config Vars". Settings > Config Vars > Reveal, and add a key/value pair for every environment variable defined in `.env`.
+
 Once the app is connected to GitHub, you can manually deploy by going to the App Dashboard > Deploy > Manual Deploy from branch `main`. (I haven't set up automatic deploys yet, but will do so if this takes off.)
 
 ## Local Development
