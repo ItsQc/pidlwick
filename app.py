@@ -36,7 +36,7 @@ class Client(discord.Client):
         super().__init__(*args, **kwargs)
 
         self.log = logging.getLogger('app.Client')
-        
+
         self.guild_name = os.environ['SERVER_NAME']
         self.vistani_channel_name = os.environ['VISTANI_MARKET_CHANNEL']
         self.tattoo_channel_name = os.environ['TATTOO_PARLOR_CHANNEL']
@@ -52,14 +52,21 @@ class Client(discord.Client):
     # Vistani Market background task
     @tasks.loop(time=vistani_market.REFRESH_TIME)
     async def refresh_vistani_market(self):
-        # Why do the guild lookup here instead of in __init__? Because at init time it seems
-        # like self.guilds is not populated yet. Maybe move this to `on_ready`?
-        guild = discord.utils.get(self.guilds, name=self.guild_name)
-        channel = discord.utils.get(guild.channels, name=self.vistani_channel_name)
+        # This could be done better, likely by spawning a separate thread or task for each guild.
+        # But for our tiny scale and number of servers (2-5) this is probably ok.
+        for guild in self.guilds:
+            channel = discord.utils.get(guild.channels, name=self.vistani_channel_name)
+            if not channel:
+                self.log.error(f'Unable to find channel {self.vistani_channel_name} in server {guild.name}')
+                return
 
-        if vistani_market.should_refresh_today():
-            output = vistani_market.generate_inventory()
-            await vistani_market.post_inventory(output, channel)
+            if vistani_market.should_refresh_today():
+                self.log.info(f'Refreshing Vistani Market in {guild.name} - {channel.name}')
+                output = vistani_market.generate_inventory()
+                await vistani_market.post_inventory(output, channel)
+            else:
+                self.log.debug(f'Not refreshing Vistani Market for {guild.name} - {channel.name} as it is not a scheduled day')
+
 
     @refresh_vistani_market.before_loop
     async def before_refresh_vistani_market(self):
@@ -68,12 +75,18 @@ class Client(discord.Client):
     # Tattoo Parlor background task
     @tasks.loop(time=tattoo_parlor.REFRESH_TIME)
     async def refresh_tattoo_parlor(self):
-        guild = discord.utils.get(self.guilds, name=self.guild_name)
-        channel = discord.utils.get(guild.channels, name=self.tattoo_channel_name)
+        for guild in self.guilds:
+            channel = discord.utils.get(guild.channels, name=self.tattoo_channel_name)
+            if not channel:
+                self.log.error(f'Unable to find channel {self.tattoo_channel_name} in server {guild.name}')
+                return
 
-        if tattoo_parlor.should_refresh_today():
-            output = tattoo_parlor.generate_inventory()
-            await tattoo_parlor.post_inventory(output, channel)
+            if tattoo_parlor.should_refresh_today():
+                self.log.info(f'Refreshing Tattoo Parlor in {guild.name} - {channel.name}')
+                output = tattoo_parlor.generate_inventory()
+                await tattoo_parlor.post_inventory(output, channel)
+            else:
+                self.log.debug(f'Not refreshing Tattoo Parlor for {guild.name} - {channel.name} as it is not a scheduled day')
 
     @refresh_tattoo_parlor.before_loop
     async def before_refresh_tattoo_parlor(self):
@@ -84,7 +97,7 @@ intents.message_content = True  # For reacting to messages
 
 client = Client(intents=intents)
 
-# Event listeners - route commands to the 'command' module
+# Event listeners - route bot commands to the 'command' module
 @client.event
 async def on_message(message):
     if message.author == client.user:
