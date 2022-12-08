@@ -37,7 +37,6 @@ class Client(discord.Client):
 
         self.log = logging.getLogger('app.Client')
 
-        self.guild_name = os.environ['SERVER_NAME']
         self.vistani_channel_name = os.environ['VISTANI_MARKET_CHANNEL']
         self.tattoo_channel_name = os.environ['TATTOO_PARLOR_CHANNEL']
 
@@ -46,7 +45,7 @@ class Client(discord.Client):
         self.refresh_tattoo_parlor.start()
 
     async def on_ready(self):
-        self.log.info(f'Logged in as {self.user} (ID: {self.user.id}), guild="{self.guild_name}"')
+        self.log.info(f'Logged in as {self.user} (ID: {self.user.id})')
         self.log.info('------')
 
     # Vistani Market background task
