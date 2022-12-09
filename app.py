@@ -37,6 +37,7 @@ class Client(discord.Client):
 
         self.log = logging.getLogger('app.Client')
 
+        self.players_role_name = os.environ['PLAYERS_ROLE']
         self.vistani_channel_name = os.environ['VISTANI_MARKET_CHANNEL']
         self.tattoo_channel_name = os.environ['TATTOO_PARLOR_CHANNEL']
 
@@ -59,10 +60,14 @@ class Client(discord.Client):
                 self.log.error(f'Unable to find channel {self.vistani_channel_name} in server {guild.name}')
                 return
 
+            role = discord.utils.get(guild.roles, name=self.players_role_name)
+            if not role:
+                self.log.error(f'Unable to find role {self.players_role_name} in server {guild.name}: @mention will not work')
+
             if vistani_market.should_refresh_today():
                 self.log.info(f'Refreshing Vistani Market in {guild.name} - {channel.name}')
                 output = vistani_market.generate_inventory()
-                await vistani_market.post_inventory(output, channel)
+                await vistani_market.post_inventory(output, channel, role)
             else:
                 self.log.debug(f'Not refreshing Vistani Market for {guild.name} - {channel.name} as it is not a scheduled day')
 
@@ -80,10 +85,14 @@ class Client(discord.Client):
                 self.log.error(f'Unable to find channel {self.tattoo_channel_name} in server {guild.name}')
                 return
 
+            role = discord.utils.get(guild.roles, name=self.players_role_name)
+            if not role:
+                self.log.error(f'Unable to find role {self.players_role_name} in server {guild.name}: @mention will not work')    
+
             if tattoo_parlor.should_refresh_today():
                 self.log.info(f'Refreshing Tattoo Parlor in {guild.name} - {channel.name}')
                 output = tattoo_parlor.generate_inventory()
-                await tattoo_parlor.post_inventory(output, channel)
+                await tattoo_parlor.post_inventory(output, channel, role)
             else:
                 self.log.debug(f'Not refreshing Tattoo Parlor for {guild.name} - {channel.name} as it is not a scheduled day')
 

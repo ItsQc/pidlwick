@@ -15,10 +15,10 @@ from utils import run_script
 # Run Quincy's script exactly as-is to generate the random inventory
 SCRIPT_URL = 'https://raw.githubusercontent.com/ItsQc/Ravenloft-Tables/main/marketGenerator.py'
 
-# The Vistani Market refreshes at 11:00pm UTC every 3 days.
+# The Vistani Market refreshes at midnight UTC every 3 days.
 # The refresh() method is called daily and checks if it has been a multiple
 # of 3 days since an authoritative start date ("epoch").
-REFRESH_TIME = time(hour=23)
+REFRESH_TIME = time()
 REFRESH_EPOCH = date(2022, 12, 2)
 REFRESH_INTERVAL_DAYS = 3
 
@@ -40,15 +40,15 @@ def generate_inventory():
     log.debug(output)
     return output
 
-async def post_inventory(inventory, channel, mute_announcement=False):
+async def post_inventory(inventory, channel, mention_role=None):
     """
     Post the content of 'inventory' to 'channel', breaking it into smaller fragments.
     """
-    messages = _chunk_output(inventory, mute_announcement)
+    messages = _chunk_output(inventory, mention_role)
     for message in messages:
         await channel.send(message)
 
-def _chunk_output(output, mute_announcement):
+def _chunk_output(output, mention_role):
     """
     Break the script output into smaller messages to stay below Discord API's 2000 character limit.
     This is brittle, relying on the exact format of marketGenerator.py's output.
@@ -62,7 +62,7 @@ def _chunk_output(output, mute_announcement):
     materials = output[materials_index:announcement_index]
     announcement = output[announcement_index:]
 
-    if mute_announcement:
-        announcement = announcement.replace('@Players', '<@>Players')
+    if mention_role:
+        announcement = announcement.replace('@Players', f'<@&{mention_role.id}>')
 
     return (items, scrolls, materials, announcement)

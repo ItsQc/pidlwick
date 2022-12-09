@@ -41,18 +41,16 @@ async def _handle_help(message):
 async def _handle_refresh_vistani(message):
     """
     Regenerate the Vistani Market inventory in the same channel as the command.
-    It's for testing, so let's not spam people with '@Players' pings.
     """
     output = vistani_market.generate_inventory()
-    await vistani_market.post_inventory(output, message.channel, mute_announcement=True)
+    await vistani_market.post_inventory(output, message.channel)
 
 async def _handle_refresh_tattoo(message):
     """
     Regenerate the Tattoo Parlor inventory in the same channel as the command.
-    It's for testing, so let's not spam people with '@Players' pings.
     """
     output = tattoo_parlor.generate_inventory()
-    await tattoo_parlor.post_inventory(output, message.channel, mute_announcement=True)
+    await tattoo_parlor.post_inventory(output, message.channel)
 
 async def _handle_unknown_command(message):
     command = message.content.removeprefix(PREFIX)
