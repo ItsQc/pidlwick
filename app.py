@@ -13,6 +13,7 @@ import logging.config
 import commands
 import vistani_market
 import tattoo_parlor
+import cakeday
 
 from dotenv import load_dotenv
 from discord.ext import tasks
@@ -40,6 +41,8 @@ class Client(discord.Client):
         self.players_role_name = os.environ['PLAYERS_ROLE']
         self.vistani_channel_name = os.environ['VISTANI_MARKET_CHANNEL']
         self.tattoo_channel_name = os.environ['TATTOO_PARLOR_CHANNEL']
+        self.cakeday_public_channel_name = os.environ['CAKEDAY_PUBLIC_CHANNEL']
+        self.cakeday_private_channel_name = os.environ['CAKEDAY_PRIVATE_CHANNEL']
 
     async def setup_hook(self) -> None:
         self.refresh_vistani_market.start()
@@ -100,9 +103,36 @@ class Client(discord.Client):
     async def before_refresh_tattoo_parlor(self):
         await self.wait_until_ready()
 
+    # Cakeday Announcement background task
+    @tasks.loop(time=cakeday.CHECK_TIME)
+    async def announce_cakedays(self):
+        for guild in self.guilds:
+            public_channel = discord.utils.get(guild.channels, name=self.cakeday_public_channel_name)
+            private_channel = discord.utils.get(guild.channels, name=self.cakeday_private_channel_name)
+
+            if not public_channel:
+                self.log.error(f'Unable to find channel {self.cakeday_public_channel_name} in server {guild.name}')
+                return
+
+            members = cakeday.get_members(guild)
+            if members:
+                self.log.info(f'Server {guild.name} has {len(members)} members with cakedays today')
+                cakeday.announce_public(members, public_channel)
+
+                if private_channel:
+                    cakeday.announce_private(members, private_channel)
+                else:
+                    self.log.error(f'Unable to find channel {self.cakeday_private_channel_name} in server {guild.name}')
+            else:
+                self.log.info(f'Server {guild.name} has no members with cakedays today')
+
+    @announce_cakedays.before_loop
+    async def before_announce_cakedays(self):
+        await self.wait_until_ready()
+
 intents = discord.Intents.default()
 intents.message_content = True  # For reacting to messages
-
+intents.members = True  # For iterating over guild.members
 client = Client(intents=intents)
 
 # Event listeners - route bot commands to the 'command' module

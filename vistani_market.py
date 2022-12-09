@@ -10,7 +10,7 @@
 import logging
 
 from datetime import date, time
-from utils import run_script
+from utils import run_script, embed_role_mention
 
 # Run Quincy's script exactly as-is to generate the random inventory
 SCRIPT_URL = 'https://raw.githubusercontent.com/ItsQc/Ravenloft-Tables/main/marketGenerator.py'
@@ -63,6 +63,6 @@ def _chunk_output(output, mention_role):
     announcement = output[announcement_index:]
 
     if mention_role:
-        announcement = announcement.replace('@Players', f'<@&{mention_role.id}>')
+        announcement = announcement.replace('@Players', embed_role_mention(mention_role.id))
 
     return (items, scrolls, materials, announcement)

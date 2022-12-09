@@ -23,3 +23,9 @@ def run_script(script_url):
     script_stdout = s.getvalue()
 
     return script_stdout
+
+def embed_role_mention(role_id):
+    """
+    Returns an embedding suitable for a role mention, e.g. '@Players'.
+    """
+    return f'<@&{role_id}>'
