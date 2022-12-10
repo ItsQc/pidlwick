@@ -20,13 +20,16 @@ def get_members(guild, today=date.today()):
     cakeday_members = []
     
     for member in guild.members:
+        if member.bot:
+            continue # Cake is for humans
+
         joined_at = member.joined_at
         if joined_at.month == today.month and joined_at.day == today.day and joined_at.year < today.year:
-            log.debug(f'Server {guild.name} member ({member.name}, {member.joined_at}) has their cakeday on {today}')
+            log.debug(f'Server {guild.name} member ({member.display_name}, {member.joined_at}) has their cakeday on {today}')
             years = today.year - joined_at.year
             cakeday_members.append((member, years))
 
-    cakeday_members.sort(key=lambda x: x[0].name) # secondary sort by name ASC
+    cakeday_members.sort(key=lambda x: x[0].display_name) # secondary sort by name ASC
     cakeday_members.sort(key=lambda x: x[1]) # primary sort by years ASC
 
     return cakeday_members

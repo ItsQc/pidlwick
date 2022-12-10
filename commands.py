@@ -10,6 +10,7 @@ import tattoo_parlor
 import cakeday
 
 from datetime import date
+from utils import embed_nickname_mention
 
 PREFIX = '$pw '
 
@@ -87,7 +88,7 @@ async def _handle_cakeday(message, match):
         member_words = 'member has' if len(cakeday_members) == 1 else 'members have'
         output = f'**{len(cakeday_members)} {member_words} their cakeday {date_words}:**\n'
         for member, years in cakeday_members:
-            output += f'\t* {member.name} - {years} year'
+            output += f'\t* {embed_nickname_mention(member.id)} - {years} year'
             if years > 1:
                 output += 's'
             output += '\n'

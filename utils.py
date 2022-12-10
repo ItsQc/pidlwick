@@ -29,3 +29,9 @@ def embed_role_mention(role_id):
     Returns an embedding suitable for a role mention, e.g. '@Players'.
     """
     return f'<@&{role_id}>'
+
+def embed_nickname_mention(user_id):
+    """
+    Returns an embedding of a mention using a server-specific nickname.
+    """
+    return f'<@!{user_id}>'
