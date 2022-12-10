@@ -41,8 +41,8 @@ class Client(discord.Client):
         self.players_role_name = os.environ['PLAYERS_ROLE']
         self.vistani_channel_name = os.environ['VISTANI_MARKET_CHANNEL']
         self.tattoo_channel_name = os.environ['TATTOO_PARLOR_CHANNEL']
-        self.cakeday_public_channel_name = os.environ['CAKEDAY_PUBLIC_CHANNEL']
-        self.cakeday_private_channel_name = os.environ['CAKEDAY_PRIVATE_CHANNEL']
+        self.cakeday_channel_name = os.environ['CAKEDAY_ANNOUNCEMENT_CHANNEL']
+        self.bot_channel_name = os.environ['BOT_NOTIFICATION_CHANNEL']
 
     async def setup_hook(self) -> None:
         self.refresh_vistani_market.start()
@@ -107,22 +107,22 @@ class Client(discord.Client):
     @tasks.loop(time=cakeday.CHECK_TIME)
     async def announce_cakedays(self):
         for guild in self.guilds:
-            public_channel = discord.utils.get(guild.channels, name=self.cakeday_public_channel_name)
-            private_channel = discord.utils.get(guild.channels, name=self.cakeday_private_channel_name)
+            cakeday_channel = discord.utils.get(guild.channels, name=self.cakeday_channel_name)
+            bot_channel = discord.utils.get(guild.channels, name=self.bot_channel_name)
 
-            if not public_channel:
-                self.log.error(f'Unable to find channel {self.cakeday_public_channel_name} in server {guild.name}')
+            if not cakeday_channel:
+                self.log.error(f'Unable to find channel {self.cakeday_channel_name} in server {guild.name}')
                 return
 
             members = cakeday.get_members(guild)
             if members:
                 self.log.info(f'Server {guild.name} has {len(members)} members with cakedays today')
-                cakeday.announce_public(members, public_channel)
+                cakeday.make_announcement(members, cakeday_channel)
 
-                if private_channel:
-                    cakeday.announce_private(members, private_channel)
+                if bot_channel:
+                    cakeday.notify_staff(members, bot_channel)
                 else:
-                    self.log.error(f'Unable to find channel {self.cakeday_private_channel_name} in server {guild.name}')
+                    self.log.error(f'Unable to find channel {self.bot_channel_name} in server {guild.name}')
             else:
                 self.log.info(f'Server {guild.name} has no members with cakedays today')
 

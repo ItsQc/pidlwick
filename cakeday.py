@@ -31,7 +31,7 @@ def get_members(guild, today=date.today()):
 
     return cakeday_members
 
-def announce_public(members, channel):
+def make_announcement(members, channel):
     """
     Make a public announcement to the playerbase congratulating cakeday members.
     """
@@ -40,7 +40,7 @@ def announce_public(members, channel):
     # Cake image attachment
     pass
 
-def announce_private(members, channel):
+def notify_staff(members, channel):
     """
     Make a private announcement so that staff can add a special role to cakeday members.
     """
