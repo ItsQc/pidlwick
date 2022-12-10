@@ -26,7 +26,7 @@ def get_members(guild, today=date.today()):
             years = today.year - joined_at.year
             cakeday_members.append((member, years))
 
-    cakeday_members.sort(key=lambda x: x[0]) # secondary sort by name ASC
+    cakeday_members.sort(key=lambda x: x[0].name) # secondary sort by name ASC
     cakeday_members.sort(key=lambda x: x[1]) # primary sort by years ASC
 
     return cakeday_members
