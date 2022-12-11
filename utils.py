@@ -24,6 +24,13 @@ def run_script(script_url):
 
     return script_stdout
 
+def partition(l, n):
+    """
+    Partition the list l into chunks/sublists of size n.
+    """
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 def embed_role_mention(role_id):
     """
     Returns an embedding suitable for a role mention, e.g. '@Players'.

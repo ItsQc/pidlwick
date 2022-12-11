@@ -9,7 +9,7 @@ import vistani_market
 import tattoo_parlor
 import cakeday
 
-from datetime import date
+from datetime import datetime
 from utils import embed_nickname_mention
 
 PREFIX = '$pw '
@@ -74,9 +74,9 @@ async def _handle_cakeday(message, match):
     given_date = match.group(1)
     if given_date:
         try:
-            given_date = date.fromisoformat(given_date)
-            cakeday_members = cakeday.get_members(message.guild, today=given_date)
-            date_words = f'on {match.group(1)}'
+            given_date = datetime.fromisoformat(given_date)
+            cakeday_members = cakeday.get_members(message.guild, now=given_date)
+            date_words = f'on {match.group(1)} (UTC)'
         except ValueError:
             await message.channel.send(f'Invalid date: "{given_date}" (must be YYYY-MM-DD)')
             return

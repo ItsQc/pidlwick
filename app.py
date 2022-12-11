@@ -39,6 +39,7 @@ class Client(discord.Client):
         self.log = logging.getLogger('app.Client')
 
         self.players_role_name = os.environ['PLAYERS_ROLE']
+        self.mods_role_name = os.environ['MODS_ROLE']
         self.vistani_channel_name = os.environ['VISTANI_MARKET_CHANNEL']
         self.tattoo_channel_name = os.environ['TATTOO_PARLOR_CHANNEL']
         self.cakeday_channel_name = os.environ['CAKEDAY_ANNOUNCEMENT_CHANNEL']
@@ -47,6 +48,7 @@ class Client(discord.Client):
     async def setup_hook(self) -> None:
         self.refresh_vistani_market.start()
         self.refresh_tattoo_parlor.start()
+        self.announce_cakedays.start()
 
     async def on_ready(self):
         self.log.info(f'Logged in as {self.user} (ID: {self.user.id})')
@@ -117,10 +119,11 @@ class Client(discord.Client):
             members = cakeday.get_members(guild)
             if members:
                 self.log.info(f'Server {guild.name} has {len(members)} members with cakedays today')
-                cakeday.make_announcement(members, cakeday_channel)
+                await cakeday.make_announcement(members, cakeday_channel)
 
                 if bot_channel:
-                    cakeday.notify_staff(members, bot_channel)
+                    role = discord.utils.get(guild.roles, name=self.mods_role_name)
+                    await cakeday.notify_staff(members, bot_channel, role)
                 else:
                     self.log.error(f'Unable to find channel {self.bot_channel_name} in server {guild.name}')
             else:
