@@ -46,6 +46,11 @@ class Client(discord.Client):
     async def on_ready(self):
         self.log.info(f'Logged in as {self.user} (ID: {self.user.id})')
         self.log.info('------')
+        # Temp Debugging
+        for guild in self.guilds:
+            channel_id = int(os.environ['VISTANI_MARKET_CHANNEL'])
+            channel = guild.get_channel(channel_id)
+            self.log.debug(f'Vistani channel {channel.name if channel else "Not found"}')
 
     # Vistani Market background task
     @tasks.loop(time=vistani_market.REFRESH_TIME)
@@ -53,13 +58,13 @@ class Client(discord.Client):
         # This could be done better, likely by spawning a separate thread or task for each guild.
         # But for our tiny scale and number of servers (2-5) this is probably ok.
         for guild in self.guilds:
-            channel_id = os.environ['VISTANI_MARKET_CHANNEL']
+            channel_id = int(os.environ['VISTANI_MARKET_CHANNEL'])
             channel = guild.get_channel(channel_id)
             if not channel:
                 self.log.error(f'Unable to find Vistani Market channel (ID={channel_id}) in server {guild.name}')
                 return
 
-            players_role_id = os.environ['PLAYERS_ROLE']
+            players_role_id = int(os.environ['PLAYERS_ROLE'])
             role = guild.get_role(players_role_id)
             if not role:
                 self.log.error(f'Unable to find Players role (ID={players_role_id}) in server {guild.name}: @mention will not work')
@@ -80,13 +85,13 @@ class Client(discord.Client):
     @tasks.loop(time=tattoo_parlor.REFRESH_TIME)
     async def refresh_tattoo_parlor(self):
         for guild in self.guilds:
-            channel_id = os.environ['TATTOO_PARLOR_CHANNEL']
+            channel_id = int(os.environ['TATTOO_PARLOR_CHANNEL'])
             channel = guild.get_channel(channel_id)
             if not channel:
                 self.log.error(f'Unable to find Tattoo Parlor channel (ID={channel_id}) in server {guild.name}')
                 return
 
-            players_role_id = os.environ['PLAYERS_ROLE']
+            players_role_id = int(os.environ['PLAYERS_ROLE'])
             role = guild.get_role(players_role_id)
             if not role:
                 self.log.error(f'Unable to find Players role (ID={players_role_id}) in server {guild.name}: @mention will not work')
@@ -106,9 +111,9 @@ class Client(discord.Client):
     @tasks.loop(time=cakeday.CHECK_TIME)
     async def announce_cakedays(self):
         for guild in self.guilds:
-            cakeday_channel_id = os.environ['CAKEDAY_ANNOUNCEMENT_CHANNEL']
+            cakeday_channel_id = int(os.environ['CAKEDAY_ANNOUNCEMENT_CHANNEL'])
             cakeday_channel = guild.get_channel(cakeday_channel_id)
-            bot_channel_id = os.environ['BOT_NOTIFICATION_CHANNEL']
+            bot_channel_id = int(os.environ['BOT_NOTIFICATION_CHANNEL'])
             bot_channel = guild.get_channel(bot_channel_id)
 
             if not cakeday_channel:
@@ -121,7 +126,7 @@ class Client(discord.Client):
                 await cakeday.make_announcement(members, cakeday_channel)
 
                 if bot_channel:
-                    mods_role_id = os.environ['MODS_ROLE']
+                    mods_role_id = int(os.environ['MODS_ROLE'])
                     mods_role = guild.get_role(mods_role_id)
                     await cakeday.notify_staff(members, bot_channel, mods_role)
                 else:
