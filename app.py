@@ -46,11 +46,6 @@ class Client(discord.Client):
     async def on_ready(self):
         self.log.info(f'Logged in as {self.user} (ID: {self.user.id})')
         self.log.info('------')
-        # Temp Debugging
-        for guild in self.guilds:
-            channel_id = int(os.environ['VISTANI_MARKET_CHANNEL'])
-            channel = guild.get_channel(channel_id)
-            self.log.debug(f'Vistani channel {channel.name if channel else "Not found"}')
 
     # Vistani Market background task
     @tasks.loop(time=vistani_market.REFRESH_TIME)
