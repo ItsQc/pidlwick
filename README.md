@@ -46,3 +46,23 @@ Once everything is set up, you can run the bot locally using
 ```
 python3 app.py
 ```
+
+## Features
+
+This attempts to be an up-to-date list of the functionality the bot provides.
+
+1. **Refresh Vistani Market Inventory**
+
+The Vistani Market inventory is randomly regenerated on a regular schedule - see `vistani_market.py`.
+
+2. **Refresh Tattoo Parlor Inventory**
+
+The Tattoo Parlor inventory is randomly regenerated on a regular schedule - see `tattoo_parlor.py`.
+
+3. **Cakeday Announcements**
+
+The bot does a daily check for users having their cakeday (a.k.a. server join anniversary) today. If found it sends a congratulatory message to those players and gives them a special role to highlight their achievement - see `cakeday.py`.
+
+4. **Bot Commands**
+
+The bot recognizes messages having a certain prefix as special commands - see `commands.py`. Execution of these commands is limited to Staff members and above.

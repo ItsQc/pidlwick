@@ -73,6 +73,11 @@ class Client(discord.Client):
             self.mods_role = discord.utils.get(self.guild.roles, name='Mods')
         log_result(self.mods_role, 'Mods role')
 
+        self.year_one_player_role = self.guild.get_role(int(os.environ['YEAR_ONE_PLAYER_ROLE']))
+        if not self.year_one_player_role:
+            self.year_one_player_role = discord.utils.get(self.guild.roles, name='Year 1 Player')
+        log_result(self.year_one_player_role, 'Year 1 Player role')
+
     # Message handling: route bot commands to the commands module
     async def on_message(self, message):
         if message.author == self.user:
@@ -114,8 +119,15 @@ class Client(discord.Client):
         members = cakeday.get_members(self.guild)
         if members:
             self.log.info(f'Server {self.guild.name} has {len(members)} members with cakedays today!')
-            await cakeday.make_announcement(members, self.cakeday_announcement_channel)
-            await cakeday.notify_staff(members, self.bot_notification_channel, self.mods_role)
+            message = await cakeday.make_announcement(members, self.cakeday_announcement_channel)
+
+            try:
+                add_role_success = cakeday.add_role(members, self.year_one_player_role)
+            except discord.Forbidden | discord.HTTPException as e:
+                self.log.error(f'Exception while adding Year 1 Player role: {e}')
+                add_role_success = False
+            finally:
+                await cakeday.notify_staff(members, self.bot_notification_channel, self.mods_role, message.jump_url, add_role_success)
         else:
             self.log.info(f'Server {self.guild.name} has no members with cakedays today')
 

@@ -28,7 +28,7 @@ async def handle(client, message):
     cmd = message.content.removeprefix(PREFIX).strip()
 
     if message.author.get_role(client.staff_role.id):
-        log.debug(f'Handling: "{message.content}" from {message.author.display_name}')
+        log.debug(f'Handling: "{cmd}" from {message.author.display_name}')
     else:
         log.debug(f'Ignoring command from a non-staff user: "{cmd}, {message.author.display_name}"')
         return

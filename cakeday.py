@@ -74,13 +74,14 @@ async def make_announcement(members, channel):
     epilogue += 'their commitment to the server with a special ⭐ (optional) alongside their name.*'
 
     if len(callouts) <= 10:
-        await _announce_compact(channel, preface, callouts, thanks, epilogue)
+        return await _announce_compact(channel, preface, callouts, thanks, epilogue)
     else:
-        await _announce_split(channel, preface, callouts, thanks, epilogue)
+        return await _announce_split(channel, preface, callouts, thanks, epilogue)
 
 async def _announce_compact(channel, preface, callouts, thanks, epilogue):
     """
-    Make the public announcement in a single message (+ epilogue).
+    Make the public announcement in a single message (+ epilogue). Return the
+    primary message that was sent.
     """
     output = preface
     for callout in callouts:
@@ -92,18 +93,21 @@ async def _announce_compact(channel, preface, callouts, thanks, epilogue):
     with open(IMAGE_PATH, 'rb') as f:
         image = File(f)
 
-    await channel.send(content=output, file=image)
+    sent = await channel.send(content=output, file=image)
 
     # The epilogue text is sent as a separate message so that the image attachment appears
     # visually just below "Happy Cake Day".
     await channel.send(epilogue)
 
+    return sent
+
 async def _announce_split(channel, preface, callouts, thanks, epilogue):
     """
     Make the public announcement by splitting member mentions into multiple messages.
     This is to stay below Discord's 2000 character limit for large numbers of members.
+    Returns the first "preface" message that was sent.
     """
-    await channel.send(preface)
+    sent = await channel.send(preface)
 
     for batch in partition(callouts, 10):
         await channel.send(batch.join(''))
@@ -116,7 +120,21 @@ async def _announce_split(channel, preface, callouts, thanks, epilogue):
 
     await channel.send(epilogue)
 
-async def notify_staff(members, channel, role):
+    return sent
+
+def add_role(members, year_one_player_role):
+    """
+    Adds the Year 1 Player role to the specified members.
+    """
+    if year_one_player_role:
+        for member, years in members:
+            member.add_roles(year_one_player_role, reason='Cakeday')
+        return True
+    else:
+        log.error(f'year_one_player_role is None, cannot add role to {len(members)} members')
+        return False
+
+async def notify_staff(members, channel, role, message_url, success):
     """
     Make a private announcement so that staff can add a special role to cakeday members.
     """
@@ -126,11 +144,17 @@ async def notify_staff(members, channel, role):
 
     log.info(f'Notifying mods about {len(members)} members having cakedays today')
 
-    mods = embed_role_mention(role.id) if role else 'Mods'
-    output = f'{mods} - Please add special anniversary roles to these users celebrating cakedays today:\n'
+    mods = embed_role_mention(role.id) if role and not success else 'Mods'
+    member_words = 'member is' if len(members) == 1 else 'members are'
+    output = f'{mods} - {len(members)} {member_words} celebrating their cakeday today ({message_url}):\n'
 
     for member, years in members:
         output += f'\t{member.display_name} ({years} '
         output += 'years)\n' if years > 1 else 'year)\n' 
+
+    if success:
+        output += 'The `Year 1 Player` role was added automatically - nothing for you to do!'
+    else:
+        output += 'The `Year 1 Player` role was **NOT** added automatically - please add it when you can.'
 
     await channel.send(output)
