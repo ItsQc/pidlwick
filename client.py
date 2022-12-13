@@ -60,17 +60,17 @@ class Client(discord.Client):
         # FIXME: I don't have the right Role IDs - maybe I need Manage Server permissions to get them?
         self.players_role = self.guild.get_role(int(os.environ['PLAYERS_ROLE']))
         if not self.players_role:
-            self.players_role = discord.utils.find(self.guild.roles, name='Players')
+            self.players_role = discord.utils.get(self.guild.roles, name='Players')
         log_result(self.players_role, 'Players role')
 
         self.staff_role = self.guild.get_role(int(os.environ['STAFF_ROLE']))
         if not self.staff_role:
-            self.staff_role = discord.utils.find(self.guild.roles, name='Staff')
+            self.staff_role = discord.utils.get(self.guild.roles, name='Staff')
         log_result(self.staff_role, 'Staff role')
 
         self.mods_role = self.guild.get_role(int(os.environ['MODS_ROLE']))
         if not self.mods_role:
-            self.mods_role = discord.utils.find(self.guild.roles, name='Mods')
+            self.mods_role = discord.utils.get(self.guild.roles, name='Mods')
         log_result(self.mods_role, 'Mods role')
 
     # Message handling: route bot commands to the commands module
