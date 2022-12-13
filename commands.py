@@ -21,13 +21,17 @@ CMD_CAKEDAY_REGEX = re.compile(r'cakeday\s*(\d{4}-\d{2}-\d{2})?')
 
 log = logging.getLogger('app.commands')
 
-async def handle(message):
+async def handle(client, message):
     """
     Parse a bot command and route it to the correct handler along with any arguments. 
     """
-    log.debug(f'Handling: "{message.content}"')
-
     cmd = message.content.removeprefix(PREFIX).strip()
+
+    if message.author.get_role(client.staff_role.id):
+        log.debug(f'Handling: "{message.content}" from {message.author.display_name}')
+    else:
+        log.debug(f'Ignoring command from a non-staff user: "{cmd}, {message.author.display_name}"')
+        return
 
     if match := CMD_HELLO_REGEX.fullmatch(cmd):
         await _handle_hello(message, match)
