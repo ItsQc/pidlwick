@@ -19,7 +19,7 @@ SCRIPT_URL = 'https://raw.githubusercontent.com/ItsQc/Ravenloft-Tables/main/mark
 # The refresh() method is called daily and checks if it has been a multiple
 # of 3 days since an authoritative start date ("epoch").
 REFRESH_TIME = time()
-REFRESH_EPOCH = date(2022, 12, 2)
+REFRESH_EPOCH = date(2022, 12, 12)
 REFRESH_INTERVAL_DAYS = 3
 
 log = logging.getLogger('app.vistani_market')
