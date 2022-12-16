@@ -3,9 +3,12 @@
 # Misc utilities for the Pidlwick bot.
 
 import urllib.request
+import random
+import csv
 
 from io import StringIO
 from contextlib import redirect_stdout
+from discord import Colour
 
 # TODO: Make this async
 def run_script(script_url):
@@ -42,3 +45,65 @@ def embed_nickname_mention(user_id):
     Returns an embedding of a mention using a server-specific nickname.
     """
     return f'<@!{user_id}>'
+
+def random_preset_colour(choices=None):
+    """
+    Returns a random Colour from the passed-in iterable, or from Discord.py's built-in selection.
+    """
+    if not choices:
+        choices = (
+            Colour.blue(),
+            Colour.blurple(),
+            Colour.brand_green(),
+            Colour.brand_red(),
+            Colour.dark_blue(),
+            Colour.dark_gold(),
+            Colour.dark_green(),
+            Colour.dark_grey(),
+            Colour.dark_magenta(),
+            Colour.dark_orange(),
+            Colour.dark_purple(),
+            Colour.dark_red(),
+            Colour.dark_teal(),
+            Colour.dark_theme(),
+            Colour.darker_grey(),
+            Colour.gold(),
+            Colour.green(),
+            Colour.greyple(),
+            Colour.light_grey(),
+            Colour.lighter_grey(),
+            Colour.magenta(),
+            Colour.og_blurple(),
+            Colour.orange(),
+            Colour.purple(),
+            Colour.red(),
+            Colour.teal(),
+            Colour.yellow(),
+        )
+
+    return random.choice(choices)
+
+def random_colour():
+    """
+    Returns a Colour having completely random hue.
+    """
+    return Colour.random()
+
+def load_google_sheet(sheet_id):
+    """
+    Loads a Google Spreadsheet formatted as a list of dictionaries.
+    This looks at only the first sheet if there are multiple and interprets the first row as a header
+    with field names for all of the subsequent rows.
+    """
+    url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv'
+
+    response = urllib.request.urlopen(url)
+    csv_data = response.read().decode(response.headers.get_content_charset())
+    s = StringIO(csv_data, newline='')
+
+    reader = csv.DictReader(s)
+    entries = []
+    for entry in reader:
+        entries.append(entry)
+
+    return entries

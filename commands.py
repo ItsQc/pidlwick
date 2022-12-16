@@ -8,6 +8,7 @@ import re
 import vistani_market
 import tattoo_parlor
 import cakeday
+import almanac
 
 from datetime import datetime
 from utils import embed_nickname_mention
@@ -18,6 +19,7 @@ CMD_HELLO_REGEX = re.compile(r'hello')
 CMD_HELP_REGEX = re.compile(r'help|-h|--help')
 CMD_REFRESH_REGEX = re.compile(r'refresh\s+(\w+)')
 CMD_CAKEDAY_REGEX = re.compile(r'cakeday\s*(\d{4}-\d{2}-\d{2})?')
+CMD_ALMANAC_REGEX = re.compile(r'almanac\s*(\d{4}-\d{2}-\d{2})?')
 
 log = logging.getLogger('app.commands')
 
@@ -41,8 +43,13 @@ async def handle(client, message):
         await _handle_refresh(message, match)
     elif match := CMD_CAKEDAY_REGEX.fullmatch(cmd):
         await _handle_cakeday(message, match)
+    elif match := CMD_ALMANAC_REGEX.fullmatch(cmd):
+        await _handle_almanac(client, message, match)
     else:
         await _handle_unknown_command(message)
+
+    # TODO: enable this once the bot has been updated with 'manage messages' permissions
+    #await message.delete()
 
 async def _handle_hello(message, _):
     await message.channel.send('*The creepy doll slowly gives you a thumbs up.*')
@@ -99,6 +106,24 @@ async def _handle_cakeday(message, match):
         await message.channel.send(output)
     else:
         await message.channel.send(f'No members have their cakeday {date_words}.')
+
+async def _handle_almanac(client, message, match):
+    """
+    Lookup the entry for the given date in the Barovian Almanac and display it as a
+    Discord Embed. The date defaults to today but can also be given in YYYY-MM-DD format.
+    """
+    given_date = match.group(1)
+    if given_date:
+        try:
+            given_date = datetime.fromisoformat(given_date)
+            generated = almanac.generate_embed(client.almanac_gsheet_id, timestamp=given_date)
+        except ValueError:
+            await message.channel.send(f'Invalid date: "{given_date}" (must be YYYY-MM-DD)')
+            return
+    else:
+        generated = almanac.generate_embed(client.almanac_gsheet_id)
+
+    await almanac.post_entry(generated, message.channel)
 
 async def _handle_unknown_command(message):
     command = message.content.removeprefix(PREFIX)

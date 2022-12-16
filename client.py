@@ -8,6 +8,7 @@ import discord
 import logging
 import os
 
+import almanac
 import cakeday
 import commands
 import tattoo_parlor
@@ -35,6 +36,7 @@ class Client(discord.Client):
         self.log.info('------')
 
         log_result = lambda x, subject: self.log.info(f'Found {subject} = {x.name}') if x else self.log.error(f'Unable to find {subject}')
+        log_nameless = lambda x, subject: self.log.info(f'Found {subject} = {x}') if x else self.log.error(f'Unable to find {subject}')
 
         self.guild = self.get_guild(int(os.environ['SERVER']))
         log_result(self.guild, 'server')
@@ -42,6 +44,7 @@ class Client(discord.Client):
         self.maintainer = self.guild.get_member(int(os.environ['MAINTAINER']))
         log_result(self.maintainer, 'maintainer')
 
+        # Channels
         self.vistani_inventory_channel = self.guild.get_channel(int(os.environ['VISTANI_INVENTORY_CHANNEL']))
         log_result(self.vistani_inventory_channel, 'Vistani Market inventory channel')
 
@@ -51,32 +54,48 @@ class Client(discord.Client):
         self.cakeday_announcement_channel = self.guild.get_channel(int(os.environ['CAKEDAY_ANNOUNCEMENT_CHANNEL']))
         log_result(self.cakeday_announcement_channel, 'cakeday announcement channel')
 
+        self.almanac_channel = self.guild.get_channel(int(os.environ['ALMANAC_CHANNEL']))
+        log_result(self.almanac_channel, 'Barovian Almanac channel')
+
         self.bot_notification_channel = self.guild.get_channel(int(os.environ['BOT_NOTIFICATION_CHANNEL']))
         log_result(self.bot_notification_channel, 'bot notification channel')
 
         self.bot_development_channel = self.guild.get_channel(int(os.environ['BOT_DEVELOPMENT_CHANNEL']))
         log_result(self.bot_development_channel, 'bot development channel')
 
+        # Roles
         # FIXME: I don't have the right Role IDs - maybe I need Manage Server permissions to get them?
         self.players_role = self.guild.get_role(int(os.environ['PLAYERS_ROLE']))
         if not self.players_role:
             self.players_role = discord.utils.get(self.guild.roles, name='Players')
+            if self.players_role:
+                self.log.debug(f'Players role id {self.players_role.id}')
         log_result(self.players_role, 'Players role')
 
         self.staff_role = self.guild.get_role(int(os.environ['STAFF_ROLE']))
         if not self.staff_role:
             self.staff_role = discord.utils.get(self.guild.roles, name='Staff')
+            if self.staff_role:
+                self.log.debug(f'Staff role id {self.staff_role.id}')
         log_result(self.staff_role, 'Staff role')
 
         self.mods_role = self.guild.get_role(int(os.environ['MODS_ROLE']))
         if not self.mods_role:
             self.mods_role = discord.utils.get(self.guild.roles, name='Mods')
+            if self.mods_role:
+                self.log.debug(f'Mods role id {self.mods_role.id}')
         log_result(self.mods_role, 'Mods role')
 
         self.year_one_player_role = self.guild.get_role(int(os.environ['YEAR_ONE_PLAYER_ROLE']))
         if not self.year_one_player_role:
             self.year_one_player_role = discord.utils.get(self.guild.roles, name='Year 1 Player')
+            if self.year_one_player_role:
+                self.log.debug(f'Year One Player role id {self.year_one_player_role.id}')
         log_result(self.year_one_player_role, 'Year 1 Player role')
+
+        # Google Sheets
+        self.almanac_gsheet_id = os.environ['ALMANAC_GSHEET_ID']
+        log_nameless(self.almanac_gsheet_id, 'Almanac Google Sheet ID')
 
     # Message handling: route bot commands to the commands module
     async def on_message(self, message):
@@ -95,10 +114,6 @@ class Client(discord.Client):
         else:
             self.log.info(f'Not refreshing Vistani Market inventory for {self.vistani_inventory_channel.name} as it is not a scheduled day')
 
-    @refresh_vistani_market.before_loop
-    async def before_refresh_vistani_market(self):
-        await self.wait_until_ready()
-
     # Tattoo Parlor background task
     @tasks.loop(time=tattoo_parlor.REFRESH_TIME)
     async def refresh_tattoo_parlor(self):
@@ -108,10 +123,6 @@ class Client(discord.Client):
             await tattoo_parlor.post_inventory(output, self.tattoo_inventory_channel, self.players_role)
         else:
             self.log.info(f'Not refreshing Tattoo Parlor inventory for {self.tattoo_inventory_channel} as it is not a scheduled day')
-
-    @refresh_tattoo_parlor.before_loop
-    async def before_refresh_tattoo_parlor(self):
-        await self.wait_until_ready()
 
     # Cakeday Announcement background task
     @tasks.loop(time=cakeday.CHECK_TIME)
@@ -131,6 +142,15 @@ class Client(discord.Client):
         else:
             self.log.info(f'Server {self.guild.name} has no members with cakedays today')
 
+    # Barovian Almanac background task
+    @tasks.loop(time=almanac.REFRESH_TIME)
+    async def refresh_almanac(self):
+        entry = almanac.generate_embed(self.almanac_gsheet_id)
+        await almanac.post_entry(entry, self.almanac_channel)
+
+    @refresh_vistani_market.before_loop
+    @refresh_tattoo_parlor.before_loop
     @announce_cakedays.before_loop
-    async def before_announce_cakedays(self):
+    @refresh_almanac.before_loop
+    async def before_background_tasks(self):
         await self.wait_until_ready()

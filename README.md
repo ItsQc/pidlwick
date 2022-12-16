@@ -63,6 +63,10 @@ The Tattoo Parlor inventory is randomly regenerated on a regular schedule - see 
 
 The bot does a daily check for users having their cakeday (a.k.a. server join anniversary) today. If found it sends a congratulatory message to those players and gives them a special role to highlight their achievement - see `cakeday.py`.
 
-4. **Bot Commands**
+4. **Barovian Almanac**
+
+The bot posts a daily "almanac entry" consisting of fictious information for weather, calendar, moon phase, etc. The data is drawn from an external Google Spreadsheet inspired by a post in r/CurseOfStrahd - see `almanac.py`.
+
+5. **Bot Commands**
 
 The bot recognizes messages having a certain prefix as special commands - see `commands.py`. Execution of these commands is limited to Staff members and above.
