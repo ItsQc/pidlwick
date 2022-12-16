@@ -64,33 +64,16 @@ class Client(discord.Client):
         log_result(self.bot_development_channel, 'bot development channel')
 
         # Roles
-        # FIXME: I don't have the right Role IDs - maybe I need Manage Server permissions to get them?
         self.players_role = self.guild.get_role(int(os.environ['PLAYERS_ROLE']))
-        if not self.players_role:
-            self.players_role = discord.utils.get(self.guild.roles, name='Players')
-            if self.players_role:
-                self.log.debug(f'Players role id {self.players_role.id}')
         log_result(self.players_role, 'Players role')
 
         self.staff_role = self.guild.get_role(int(os.environ['STAFF_ROLE']))
-        if not self.staff_role:
-            self.staff_role = discord.utils.get(self.guild.roles, name='Staff')
-            if self.staff_role:
-                self.log.debug(f'Staff role id {self.staff_role.id}')
         log_result(self.staff_role, 'Staff role')
 
         self.mods_role = self.guild.get_role(int(os.environ['MODS_ROLE']))
-        if not self.mods_role:
-            self.mods_role = discord.utils.get(self.guild.roles, name='Mods')
-            if self.mods_role:
-                self.log.debug(f'Mods role id {self.mods_role.id}')
         log_result(self.mods_role, 'Mods role')
 
         self.year_one_player_role = self.guild.get_role(int(os.environ['YEAR_ONE_PLAYER_ROLE']))
-        if not self.year_one_player_role:
-            self.year_one_player_role = discord.utils.get(self.guild.roles, name='Year 1 Player')
-            if self.year_one_player_role:
-                self.log.debug(f'Year One Player role id {self.year_one_player_role.id}')
         log_result(self.year_one_player_role, 'Year 1 Player role')
 
         # Google Sheets
