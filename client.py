@@ -30,6 +30,8 @@ class Client(discord.Client):
         self.refresh_vistani_market.start()
         self.refresh_tattoo_parlor.start()
         self.announce_cakedays.start()
+        self.refresh_almanac.start()
+        self.heartbeat.start()
 
     async def on_ready(self):
         self.log.info(f'Logged in as {self.user} (ID: {self.user.id})')
