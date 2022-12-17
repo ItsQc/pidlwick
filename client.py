@@ -90,6 +90,8 @@ class Client(discord.Client):
     # Vistani Market background task
     @tasks.loop(time=vistani_market.REFRESH_TIME)
     async def refresh_vistani_market(self):
+        self.log.debug('refresh_vistani_market: scheduled task has started')
+
         if vistani_market.should_refresh_today():
             self.log.info(f'Refreshing Vistani Market inventory in {self.vistani_inventory_channel.name}')
             output = vistani_market.generate_inventory()
@@ -97,9 +99,17 @@ class Client(discord.Client):
         else:
             self.log.info(f'Not refreshing Vistani Market inventory for {self.vistani_inventory_channel.name} as it is not a scheduled day')
 
+    @refresh_vistani_market.before_loop
+    async def before_refresh_vistani_market(self):
+        self.log.debug('before_refresh_vistani_market: waiting for readiness')
+        await self.wait_until_ready()
+        self.log.debug('before_refresh_vistani_market: ready now')
+
     # Tattoo Parlor background task
     @tasks.loop(time=tattoo_parlor.REFRESH_TIME)
     async def refresh_tattoo_parlor(self):
+        self.log.debug('refresh_tattoo_parlor: scheduled task has started')
+
         if tattoo_parlor.should_refresh_today():
             self.log.info(f'Refreshing Tattoo Parlor inventory in {self.tattoo_inventory_channel.name}')
             output = tattoo_parlor.generate_inventory()
@@ -107,9 +117,17 @@ class Client(discord.Client):
         else:
             self.log.info(f'Not refreshing Tattoo Parlor inventory for {self.tattoo_inventory_channel} as it is not a scheduled day')
 
+    @refresh_tattoo_parlor.before_loop
+    async def before_refresh_tattoo_parlor(self):
+        self.log.debug('before_refresh_tattoo_parlor: waiting for readiness')
+        await self.wait_until_ready()
+        self.log.debug('before_refresh_tattoo_parlor: ready now')
+
     # Cakeday Announcement background task
     @tasks.loop(time=cakeday.CHECK_TIME)
     async def announce_cakedays(self):
+        self.log.debug('announce_cakedays: scheduled task has started')
+
         members = cakeday.get_members(self.guild)
         if members:
             self.log.info(f'Server {self.guild.name} has {len(members)} members with cakedays today!')
@@ -125,15 +143,22 @@ class Client(discord.Client):
         else:
             self.log.info(f'Server {self.guild.name} has no members with cakedays today')
 
+    @announce_cakedays.before_loop
+    async def before_announce_cakedays(self):
+        self.log.debug('before_announce_cakedays: waiting for readiness')
+        await self.wait_until_ready()
+        self.log.debug('before_announce_cakedays: ready now')
+
     # Barovian Almanac background task
     @tasks.loop(time=almanac.REFRESH_TIME)
     async def refresh_almanac(self):
+        self.log.debug('refresh_almanac: scheduled task has started')
+
         entry = almanac.generate_embed(self.almanac_gsheet_id)
         await almanac.post_entry(entry, self.almanac_channel)
 
-    @refresh_vistani_market.before_loop
-    @refresh_tattoo_parlor.before_loop
-    @announce_cakedays.before_loop
     @refresh_almanac.before_loop
-    async def before_background_tasks(self):
+    async def before_refresh_almanac(self):
+        self.log.debug('before_refresh_almanac: waiting for readiness')
         await self.wait_until_ready()
+        self.log.debug('before_refresh_almanac: ready now')
