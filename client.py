@@ -162,3 +162,12 @@ class Client(discord.Client):
         self.log.debug('before_refresh_almanac: waiting for readiness')
         await self.wait_until_ready()
         self.log.debug('before_refresh_almanac: ready now')
+
+    # Heartbeat background task
+    @tasks.loop(hours=1)
+    async def heartbeat(self):
+        self.log.debug('Heartbeat')
+
+    @heartbeat.before_loop
+    async def before_heartbeat(self):
+        await self.wait_until_ready()
