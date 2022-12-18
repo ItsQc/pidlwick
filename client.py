@@ -101,12 +101,6 @@ class Client(discord.Client):
         else:
             self.log.info(f'Not refreshing Vistani Market inventory for {self.vistani_inventory_channel.name} as it is not a scheduled day')
 
-    @refresh_vistani_market.before_loop
-    async def before_refresh_vistani_market(self):
-        self.log.debug('before_refresh_vistani_market: waiting for readiness')
-        await self.wait_until_ready()
-        self.log.debug('before_refresh_vistani_market: ready now')
-
     # Tattoo Parlor background task
     @tasks.loop(time=tattoo_parlor.REFRESH_TIME)
     async def refresh_tattoo_parlor(self):
@@ -118,12 +112,6 @@ class Client(discord.Client):
             await tattoo_parlor.post_inventory(output, self.tattoo_inventory_channel, self.players_role)
         else:
             self.log.info(f'Not refreshing Tattoo Parlor inventory for {self.tattoo_inventory_channel} as it is not a scheduled day')
-
-    @refresh_tattoo_parlor.before_loop
-    async def before_refresh_tattoo_parlor(self):
-        self.log.debug('before_refresh_tattoo_parlor: waiting for readiness')
-        await self.wait_until_ready()
-        self.log.debug('before_refresh_tattoo_parlor: ready now')
 
     # Cakeday Announcement background task
     @tasks.loop(time=cakeday.CHECK_TIME)
@@ -145,12 +133,6 @@ class Client(discord.Client):
         else:
             self.log.info(f'Server {self.guild.name} has no members with cakedays today')
 
-    @announce_cakedays.before_loop
-    async def before_announce_cakedays(self):
-        self.log.debug('before_announce_cakedays: waiting for readiness')
-        await self.wait_until_ready()
-        self.log.debug('before_announce_cakedays: ready now')
-
     # Barovian Almanac background task
     @tasks.loop(time=almanac.REFRESH_TIME)
     async def refresh_almanac(self):
@@ -159,17 +141,21 @@ class Client(discord.Client):
         entry = almanac.generate_embed(self.almanac_gsheet_id)
         await almanac.post_entry(entry, self.almanac_channel)
 
-    @refresh_almanac.before_loop
-    async def before_refresh_almanac(self):
-        self.log.debug('before_refresh_almanac: waiting for readiness')
-        await self.wait_until_ready()
-        self.log.debug('before_refresh_almanac: ready now')
-
     # Heartbeat background task
     @tasks.loop(hours=1)
     async def heartbeat(self):
         self.log.debug('Heartbeat')
 
+    # NOTE: If adding a new background task make sure you:
+    #   - add a new @taskname.before_loop decorator to `before_background_tasks`, below
+    #   - add a call to self.taskname.start() to `setup_hook`, above
+
+    @refresh_vistani_market.before_loop
+    @refresh_tattoo_parlor.before_loop
+    @announce_cakedays.before_loop
+    @refresh_almanac.before_loop
     @heartbeat.before_loop
-    async def before_heartbeat(self):
+    async def before_background_tasks(self):
+        self.log.debug('before_background_tasks: waiting for readiness')
         await self.wait_until_ready()
+        self.log.debug('before_background_tasks: ready now')
