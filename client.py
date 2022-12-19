@@ -171,6 +171,7 @@ class Client(discord.Client):
 
     # NOTE: If adding a new background task make sure you:
     #   - add a new @taskname.before_loop decorator to `before_background_tasks`, below
+    #   - add a new @taskname.error decorator to `on_task_error`, below
     #   - add a call to self.taskname.start() to `setup_hook`, above
 
     @refresh_vistani_market.before_loop
@@ -183,3 +184,12 @@ class Client(discord.Client):
         self.log.debug('before_background_tasks: waiting for readiness')
         await self.wait_until_ready()
         self.log.debug('before_background_tasks: ready now')
+
+    @refresh_vistani_market.error
+    @refresh_tattoo_parlor.error
+    @announce_cakedays.error
+    @refresh_almanac.error
+    @heartbeat.error
+    @remind_staffxp.error
+    async def on_task_error(self, error):
+        self.log.error(error)
