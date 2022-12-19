@@ -5,10 +5,11 @@
 import logging
 import re
 
-import vistani_market
-import tattoo_parlor
-import cakeday
 import almanac
+import cakeday
+import staffxp_reminder
+import tattoo_parlor
+import vistani_market
 
 from datetime import datetime
 from utils import embed_nickname_mention
@@ -20,6 +21,7 @@ CMD_HELP_REGEX = re.compile(r'help|-h|--help')
 CMD_REFRESH_REGEX = re.compile(r'refresh\s+(\w+)')
 CMD_CAKEDAY_REGEX = re.compile(r'cakeday\s*(\d{4}-\d{2}-\d{2})?')
 CMD_ALMANAC_REGEX = re.compile(r'almanac\s*(\d{4}-\d{2}-\d{2})?')
+CMD_STAFFXP_REGEX = re.compile(r'staffxp_reminder')
 
 log = logging.getLogger('app.commands')
 
@@ -45,6 +47,8 @@ async def handle(client, message):
         await _handle_cakeday(message, match)
     elif match := CMD_ALMANAC_REGEX.fullmatch(cmd):
         await _handle_almanac(client, message, match)
+    elif match := CMD_STAFFXP_REGEX.fullmatch(cmd):
+        await _handle_staffxp(message, match)
     else:
         await _handle_unknown_command(message)
 
@@ -124,6 +128,12 @@ async def _handle_almanac(client, message, match):
         generated = almanac.generate_embed(client.almanac_gsheet_id)
 
     await almanac.post_entry(generated, message.channel)
+
+async def _handle_staffxp(message, match):
+    """
+    Post the Staff XP reminder in the same channel as the command. Used for testing the Embed.
+    """
+    await staffxp_reminder.send_reminder(message.channel)
 
 async def _handle_unknown_command(message):
     command = message.content.removeprefix(PREFIX)

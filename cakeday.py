@@ -122,13 +122,13 @@ async def _announce_split(channel, preface, callouts, thanks, epilogue):
 
     return sent
 
-def add_role(members, year_one_player_role):
+async def add_role(members, year_one_player_role):
     """
     Adds the Year 1 Player role to the specified members.
     """
     if year_one_player_role:
         for member, years in members:
-            member.add_roles(year_one_player_role, reason='Cakeday')
+            await member.add_roles(year_one_player_role, reason='Cakeday')
         return True
     else:
         log.error(f'year_one_player_role is None, cannot add role to {len(members)} members')

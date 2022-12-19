@@ -11,6 +11,7 @@ import os
 import almanac
 import cakeday
 import commands
+import staffxp_reminder
 import tattoo_parlor
 import vistani_market
 
@@ -32,6 +33,7 @@ class Client(discord.Client):
         self.announce_cakedays.start()
         self.refresh_almanac.start()
         self.heartbeat.start()
+        self.remind_staffxp.start()
 
     async def on_ready(self):
         self.log.info(f'Logged in as {self.user} (ID: {self.user.id})')
@@ -65,6 +67,9 @@ class Client(discord.Client):
         self.bot_development_channel = self.guild.get_channel(int(os.environ['BOT_DEVELOPMENT_CHANNEL']))
         log_result(self.bot_development_channel, 'bot development channel')
 
+        self.staffxp_reminder_channel = self.guild.get_channel(int(os.environ['STAFFXP_REMINDER_CHANNEL']))
+        log_result(self.staffxp_reminder_channel, 'Staff XP reminder channel')
+
         # Roles
         self.players_role = self.guild.get_role(int(os.environ['PLAYERS_ROLE']))
         log_result(self.players_role, 'Players role')
@@ -77,6 +82,12 @@ class Client(discord.Client):
 
         self.year_one_player_role = self.guild.get_role(int(os.environ['YEAR_ONE_PLAYER_ROLE']))
         log_result(self.year_one_player_role, 'Year 1 Player role')
+
+        self.helper_role = self.guild.get_role(int(os.environ['HELPER_ROLE']))
+        log_result(self.helper_role, 'Helper role')
+        if self.helper_role is None:
+            self.helper_role = discord.utils.get(self.guild.roles, name='Helper')
+            self.log.debug(f'Found Helper role having id={self.helper_role.id}')
 
         # Google Sheets
         self.almanac_gsheet_id = os.environ['ALMANAC_GSHEET_ID']
@@ -124,7 +135,7 @@ class Client(discord.Client):
             message = await cakeday.make_announcement(members, self.cakeday_announcement_channel)
 
             try:
-                add_role_success = cakeday.add_role(members, self.year_one_player_role)
+                add_role_success = await cakeday.add_role(members, self.year_one_player_role)
             except discord.Forbidden | discord.HTTPException as e:
                 self.log.error(f'Exception while adding Year 1 Player role: {e}')
                 add_role_success = False
@@ -146,6 +157,18 @@ class Client(discord.Client):
     async def heartbeat(self):
         self.log.debug('Heartbeat')
 
+    # Staff XP Reminder background task
+    @tasks.loop(time=staffxp_reminder.TIME)
+    async def remind_staffxp(self):
+        self.log.debug('remind_staffxp: scheduled task has started')
+
+        if staffxp_reminder.should_remind_today():
+            self.log.info(f'Reminding about Staff XP in {self.staffxp_reminder_channel.name}')
+            staffxp_reminder.send_reminder(self.staffxp_reminder_channel, self.helper_role)
+        else:
+            self.log.info(f'Not reminding about Staff XP in {self.staffxp_reminder_channel} as it is not a scheduled day')
+
+
     # NOTE: If adding a new background task make sure you:
     #   - add a new @taskname.before_loop decorator to `before_background_tasks`, below
     #   - add a call to self.taskname.start() to `setup_hook`, above
@@ -155,6 +178,7 @@ class Client(discord.Client):
     @announce_cakedays.before_loop
     @refresh_almanac.before_loop
     @heartbeat.before_loop
+    @remind_staffxp.before_loop
     async def before_background_tasks(self):
         self.log.debug('before_background_tasks: waiting for readiness')
         await self.wait_until_ready()
