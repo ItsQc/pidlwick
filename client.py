@@ -52,7 +52,7 @@ class Client(discord.Client):
         self.vistani_inventory_channel = self.guild.get_channel(int(os.environ['VISTANI_INVENTORY_CHANNEL']))
         log_result(self.vistani_inventory_channel, 'Vistani Market inventory channel')
 
-        self.tattoo_inventory_channel = self.guild.get_channel(int(os.environ['VISTANI_INVENTORY_CHANNEL']))
+        self.tattoo_inventory_channel = self.guild.get_channel(int(os.environ['TATTOO_INVENTORY_CHANNEL']))
         log_result(self.tattoo_inventory_channel, 'Tattoo Parlor inventory channel')
 
         self.cakeday_announcement_channel = self.guild.get_channel(int(os.environ['CAKEDAY_ANNOUNCEMENT_CHANNEL']))
