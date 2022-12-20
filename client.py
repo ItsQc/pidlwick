@@ -133,7 +133,11 @@ class Client(discord.Client):
             message = await cakeday.make_announcement(members, self.cakeday_announcement_channel)
 
             try:
-                add_role_success = await cakeday.add_role(members, self.year_one_player_role)
+                # Automating the "Year 1 Member" role addition is not straightforward, because there are different
+                # roles for Year 1 Player, Year 1 Helper, Year 1 Mod, etc.
+                # TODO: Revist this automation, eventually.
+                # add_role_success = await cakeday.add_role(members, self.year_one_player_role)
+                add_role_success = False
             except discord.Forbidden | discord.HTTPException as e:
                 self.log.error(f'Exception while adding Year 1 Player role: {e}')
                 add_role_success = False
