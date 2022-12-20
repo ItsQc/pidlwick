@@ -9,8 +9,9 @@ import csv
 from io import StringIO
 from contextlib import redirect_stdout
 from discord import Colour
+from traceback import format_exception
 
-# TODO: Make this async
+# TODO: Make this async (or ideally remove it after porting shop scripts into Pidlwick)
 def run_script(script_url):
     """
     Retrieves content from `script_url` and runs it as a Python script using `exec`, returning
@@ -107,3 +108,19 @@ def load_google_sheet(sheet_id):
         entries.append(entry)
 
     return entries
+
+async def notify_maintainer(channel, user, error):
+    """
+    Attempts to @mention a user in the given channel to inform them of an error.
+    """
+    if not channel:
+        return  # (shrug)
+
+    maintainer = embed_nickname_mention(user.id) if user else 'Boss'
+
+    msg = f'Uh-oh, something went wrong. Hey {maintainer}, take a look at this:\n'
+    msg += '```\n'
+    msg += ''.join(format_exception(error)) if isinstance(error, Exception) else f'{error}\n'
+    msg += '```'
+
+    await channel.send(msg)

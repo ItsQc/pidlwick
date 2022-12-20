@@ -16,6 +16,7 @@ import tattoo_parlor
 import vistani_market
 
 from discord.ext import tasks
+from utils import notify_maintainer
 
 class Client(discord.Client):
     """
@@ -85,9 +86,6 @@ class Client(discord.Client):
 
         self.helper_role = self.guild.get_role(int(os.environ['HELPER_ROLE']))
         log_result(self.helper_role, 'Helper role')
-        if self.helper_role is None:
-            self.helper_role = discord.utils.get(self.guild.roles, name='Helper')
-            self.log.debug(f'Found Helper role having id={self.helper_role.id}')
 
         # Google Sheets
         self.almanac_gsheet_id = os.environ['ALMANAC_GSHEET_ID']
@@ -192,4 +190,6 @@ class Client(discord.Client):
     @heartbeat.error
     @remind_staffxp.error
     async def on_task_error(self, error):
-        self.log.error(error)
+        self.log.exception(error)
+
+        await notify_maintainer(self.bot_development_channel, self.maintainer, error)
