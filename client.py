@@ -99,7 +99,12 @@ class Client(discord.Client):
         if message.author == self.user:
             return
         elif message.content.startswith(commands.PREFIX):
-            await commands.handle(self, message)
+            try:
+                await commands.handle(self, message)
+            except Exception as e:
+                await notify_maintainer(self.bot_development_channel, self.maintainer, e)
+            finally:
+                raise e
 
     # Vistani Market background task
     @tasks.loop(time=vistani_market.REFRESH_TIME)

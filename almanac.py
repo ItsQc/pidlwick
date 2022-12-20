@@ -65,7 +65,7 @@ def generate_embed(sheet_id, timestamp=datetime.now(timezone.utc)):
 
     special = entry[SPECIAL]
     if special:
-        embed.add_field(name=f'{NULL_VALUE}\n{special}', value=NULL_VALUE, inline=False)
+        embed.add_field(name=f'{NULL_VALUE}\n', value=special, inline=False)
     else:
          embed.add_field(name=NULL_VALUE, value=NULL_VALUE, inline=False)
 
