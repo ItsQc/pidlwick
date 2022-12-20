@@ -2,6 +2,8 @@
 #
 # Top-level handler for all bot commands.
 
+# TODO: Refactor this to use the library's utilities (e.g. discord.ext.commands.Command)
+
 import logging
 import re
 

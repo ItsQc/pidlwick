@@ -40,6 +40,9 @@ class Client(discord.Client):
         self.log.info(f'Logged in as {self.user} (ID: {self.user.id})')
         self.log.info('------')
 
+        # Sets the silly 'Watching you…' status
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='you…'))
+
         log_result = lambda x, subject: self.log.info(f'Found {subject} = {x.name}') if x else self.log.error(f'Unable to find {subject}')
         log_nameless = lambda x, subject: self.log.info(f'Found {subject} = {x}') if x else self.log.error(f'Unable to find {subject}')
 
