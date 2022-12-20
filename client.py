@@ -103,8 +103,7 @@ class Client(discord.Client):
                 await commands.handle(self, message)
             except Exception as e:
                 await notify_maintainer(self.bot_development_channel, self.maintainer, e)
-            finally:
-                raise e
+                raise
 
     # Vistani Market background task
     @tasks.loop(time=vistani_market.REFRESH_TIME)
