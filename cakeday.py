@@ -153,7 +153,9 @@ async def notify_staff(members, channel, role, message_url, success):
         output += 'years)\n' if years > 1 else 'year)\n' 
 
     if success:
-        output += 'The `Year 1 Player` role was added automatically - nothing for you to do!'
+        output += 'The `Year 1 Player` role was added automatically - nothing for you to do!\n'
+        output += '...*UNLESS* one of these users was a Staff member. Then you\'ll need to add the '
+        output += 'appropriate additional role(s) yourself (Year 1 Helper, etc).'
     else:
         output += 'The `Year 1 Player` role was **NOT** added automatically - please add it when you can.'
 
