@@ -3,13 +3,13 @@
 # Misc utilities for the Pidlwick bot.
 
 import urllib.request
-import random
 import csv
 
 from io import StringIO
 from contextlib import redirect_stdout
 from discord import Colour
 from traceback import format_exception
+from random import choice as random_choice
 
 # TODO: Make this async (or ideally remove it after porting shop scripts into Pidlwick)
 def run_script(script_url):
@@ -82,7 +82,7 @@ def random_preset_colour(choices=None):
             Colour.yellow(),
         )
 
-    return random.choice(choices)
+    return random_choice(choices)
 
 def random_colour():
     """
