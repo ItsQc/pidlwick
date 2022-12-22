@@ -13,7 +13,7 @@ from datetime import date, time
 from utils import run_script, embed_role_mention
 
 # Run Quincy's script exactly as-is to generate the random inventory
-SCRIPT_URL = 'https://raw.githubusercontent.com/ItsQc/Ravenloft-Tables/main/marketGenerator.py'
+SCRIPT_URL = 'https://github.com/Enter-Ravenloft/Table-Generators/main/marketGenerator.py'
 
 # The Vistani Market refreshes at midnight UTC every 3 days.
 # The refresh() method is called daily and checks if it has been a multiple
