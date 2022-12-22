@@ -13,7 +13,7 @@ from datetime import datetime, time
 from utils import run_script, embed_role_mention
 
 # Run Quincy's script exactly as-is to generate the random inventory
-SCRIPT_URL = 'https://raw.githubusercontent.com/ItsQc/Ravenloft-Tables/main/tattooGenerator.py'
+SCRIPT_URL = 'https://raw.githubusercontent.com/Enter-Ravenloft/Table-Generators/main/tattooGenerator.py'
 
 # The tattoo parlor refreshes at midnight UTC on Mondays.
 # The refresh() method is called daily and checks if it is a Monday.
